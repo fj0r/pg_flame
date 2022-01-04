@@ -1,6 +1,9 @@
 package config
 
-import "os"
+import (
+	"fmt"
+	"os"
+)
 
 type PG_CONFIG struct {
     Host string
@@ -28,4 +31,8 @@ func Init() PG_CONFIG {
         Database: getenv("POSTGRES_DB", "postgres"),
         Schema: getenv("POSTGRES_SCHEMA", "public"),
     }
+}
+
+func (c *PG_CONFIG)URL() string {
+    return fmt.Sprintf("postgres://%s:%s@%s:%s/%s", c.User, c.Password, c.Host, c.Port, c.Database)
 }
