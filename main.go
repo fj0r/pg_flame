@@ -1,63 +1,48 @@
 package main
 
 import (
-	"flag"
-	"fmt"
-	"os"
+	"bytes"
+	"net/http"
+	"strings"
 
+	"pg_flame/pkg/config"
 	"pg_flame/pkg/html"
 	"pg_flame/pkg/plan"
+
+	"github.com/gin-gonic/gin"
 )
 
 var (
-	// goreleaser automatically overrides this based on the tag
 	version  = "dev"
-	hFlag    = flag.Bool("h", false, "print help info")
-	helpFlag = flag.Bool("help", false, "print help info")
+	pgConfig = config.Init()
 )
 
 func main() {
-	flag.Parse()
+	r := gin.Default()
 
-	if *hFlag || *helpFlag {
-		printHelp()
-	}
+	r.GET("/hello", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "hello",
+		})
+	})
 
-	p, err := plan.New(os.Stdin)
-	if err != nil {
-		handleErr(err)
-	}
+    r.Static("/assets", "./assets")
+	r.StaticFile("/", "./assets/index.html")
 
-	err = html.Generate(os.Stdout, p)
-	if err != nil {
-		handleErr(err)
-	}
+	r.POST("/", func(c *gin.Context) {
+	    q := c.PostForm("query")
+		p, err := plan.New(strings.NewReader(q))
+		if err != nil {
+		}
+
+        out := new(bytes.Buffer)
+		err = html.Generate(out, p)
+		if err != nil {
+		}
+		c.Writer.WriteHeader(http.StatusOK)
+		c.Writer.Write(out.Bytes())
+	})
+
+	r.Run(":5000")
 }
 
-func handleErr(err error) {
-	fmt.Fprintf(os.Stderr, "Error: %v", err)
-	os.Exit(1)
-}
-
-func printHelp() {
-	help := `pg_flame %s
-
-Turn Postgres query plans into flamegraphs.
-
-Usage:
-
-  pg_flame [options]
-
-Without Options:
-
-  Reads a JSON query plan from standard input and writes the
-  flamegraph html to standard output.
-
-Options:
-
-  -h, --help	print help information
-`
-
-	fmt.Printf(help, version)
-	os.Exit(0)
-}

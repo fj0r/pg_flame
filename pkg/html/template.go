@@ -94,9 +94,9 @@ var templateHTML *template.Template = template.Must(template.New("html").Parse(`
       </div>
     </div>
 
-    <script src="https://d3js.org/d3.v4.min.js" charset="utf-8"></script>
-    <script type="text/javascript" src=https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.9.1/d3-tip.min.js></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/spiermar/d3-flame-graph@2.1.3/dist/d3-flamegraph.min.js"></script>
+    <script src="/assets/d3.v4.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src=/assets/d3-tip.min.js></script>
+    <script type="text/javascript" src="/assets/d3-flamegraph.min.js"></script>
 
     <script type="text/javascript">
     var flameGraph = d3.flamegraph()
