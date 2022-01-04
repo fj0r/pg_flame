@@ -20,4 +20,5 @@ flamegraph.html
 # Distribution directory
 dist
 main
-http
+http-gin
+http-echo

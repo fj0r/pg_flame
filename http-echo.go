@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"net/http"
 	"strings"
 	"context"
 	"os"
@@ -12,7 +11,7 @@ import (
 	"pg_flame/pkg/html"
 	"pg_flame/pkg/plan"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -31,44 +30,42 @@ func main() {
 	}
 	defer conn.Close(context.Background())
 
-	r := gin.Default()
+    e := echo.New()
 
-	r.GET("/info", func(c *gin.Context) {
-		c.JSON(200, gin.H{
+	e.GET("/info", func(c echo.Context) error {
+		return c.JSON(200, map[string]string {
 			"version": version,
 		})
 	})
 
-    r.Static("/assets", "./assets")
-	r.StaticFile("/", "./assets/index.html")
+    e.Static("/assets", "./assets")
+	e.File("/", "./assets/index.html")
 
-	r.POST("/", func(c *gin.Context) {
-	    q := fmt.Sprintf("explain (analyze, buffers, format json) %s", c.PostForm("query"))
+	e.POST("/", func(c echo.Context) error {
+	    q := fmt.Sprintf("explain (analyze, buffers, format json) %s", c.FormValue("query"))
 	    var exp string
 	    err := conn.QueryRow(context.Background(), q).Scan(&exp)
 	    if err != nil {
 	        c.String(500, err.Error())
-	        return
+	        return nil
 	    }
-
 
 		p, err := plan.New(strings.NewReader(exp))
 		if err != nil {
 	        c.String(501, err.Error())
-	        return
+	        return nil
 		}
 
         out := new(bytes.Buffer)
 		err = html.Generate(out, p)
 		if err != nil {
 	        c.String(502, err.Error())
-	        return
+	        return nil
 		}
 
-		c.Writer.WriteHeader(http.StatusOK)
-		c.Writer.Write(out.Bytes())
+        return c.HTML(200, out.String())
 	})
 
-	r.Run(":5000")
+	e.Start(":5000")
 }
 
