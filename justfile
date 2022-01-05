@@ -1,2 +1,2 @@
 build target="echo":
-    go build -ldflags "-s -w" http-{{target}}.go
+    go build -o pg_flame -ldflags "-s -w" http-{{target}}.go
