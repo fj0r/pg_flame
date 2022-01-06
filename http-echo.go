@@ -18,6 +18,7 @@ import (
 var (
 	version  = "dev"
 	pgConfig = config.Init()
+	listen   = config.Getenv("PGFLAME_PORT", "5000")
 )
 
 func main() {
@@ -66,5 +67,5 @@ func main() {
 		return c.HTML(200, out.String())
 	})
 
-	e.Start(":5000")
+	e.Start(fmt.Sprintf(":%s", listen))
 }
