@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	version  = "dev"
+	version  = "1.1.1"
 	pgConfig = config.Init()
 	listen   = config.Getenv("PGFLAME_PORT", "5000")
 )
@@ -46,7 +46,10 @@ func main() {
 
 	e.GET("/info", func(c echo.Context) error {
 		return c.JSON(200, map[string]string{
+		    "id": "pg_flame",
+		    "serv": "echo",
 			"version": version,
+			"pg_flame_ver": "v1.2",
 		})
 	})
 
