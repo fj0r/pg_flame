@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"path"
+	"path/filepath"
 
 	"pg_flame/pkg/config"
 	"pg_flame/pkg/html"
@@ -22,6 +24,14 @@ var (
 )
 
 func main() {
+	// path
+	ex, err := os.Executable()
+    if err != nil {
+        panic(err)
+    }
+    exPath := filepath.Dir(ex)
+
+    // database
 	pgstr := pgConfig.URL()
 	conn, err := pgx.Connect(context.Background(), pgstr)
 	println(fmt.Sprintf("connect to postgres: %s", pgstr))
@@ -31,6 +41,7 @@ func main() {
 	}
 	defer conn.Close(context.Background())
 
+    // echo
 	e := echo.New()
 
 	e.GET("/info", func(c echo.Context) error {
@@ -39,8 +50,8 @@ func main() {
 		})
 	})
 
-	e.Static("/assets", "./assets")
-	e.File("/", "./assets/index.html")
+	e.Static("/assets", path.Join(exPath, "assets"))
+	e.File("/", path.Join(exPath, "assets/index.html"))
 
 	e.POST("/", func(c echo.Context) error {
 		q := fmt.Sprintf("explain (analyze, buffers, format json) %s", c.FormValue("query"))
